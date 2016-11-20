@@ -30,10 +30,10 @@ type Game1() as this =
         do spriteBatch <- new SpriteBatch(this.GraphicsDevice)
         let textures = 
             Map.empty.
-                Add("Ship", spriteLoader ("Ship.png") graphics.GraphicsDevice).
-                Add("thruster", spriteLoader ("thruster.png") graphics.GraphicsDevice).
-                Add("projectile", spriteLoader ("projectile.png") graphics.GraphicsDevice).
-                Add("asteroid", spriteLoader ("asteroid.png") graphics.GraphicsDevice)
+                Add("Ship", this.Content.Load<Texture2D>("bin/Ship")).
+                Add("thruster", this.Content.Load<Texture2D>("bin/thruster")).
+                Add("projectile", this.Content.Load<Texture2D>("bin/projectile")).
+                Add("asteroid", this.Content.Load<Texture2D>("bin/asteroid"))
         gameState <- gameState.LoadTextures(textures)
                 
     override this.Update (gameTime) =

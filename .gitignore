@@ -287,3 +287,6 @@ __pycache__/
 
 ### VisualStudio Patch ###
 build/
+
+Astroids/Astroids/bin
+
