@@ -71,7 +71,6 @@
     <None Include="Content\projectile.png" />
     <None Include="Content\thruster.png" />
     <None Include="packages.config" />
-    <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
