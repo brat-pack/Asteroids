@@ -64,6 +64,7 @@
     <Compile Include="Program.fs" />
     <Compile Include="Main.fs" />
     <None Include="App.config" />
+<<<<<<< HEAD
     <None Include="Content\Ship.png" />
     <None Include="Content\asteroid.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -71,6 +72,18 @@
     <None Include="Content\projectile.png" />
     <None Include="Content\thruster.png" />
     <None Include="packages.config" />
+=======
+    <Content Include="packages.config" />
+    <None Include="Content\Ship.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\thruster.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\projectile.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+>>>>>>> parent of 56e918c... Added the asteroids
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

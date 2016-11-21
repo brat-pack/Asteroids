@@ -39,6 +39,9 @@ type Game1() as this =
                 Add("Ship", spriteLoader ("Ship.png") graphics.GraphicsDevice).
                 Add("thruster", spriteLoader ("thruster.png") graphics.GraphicsDevice).
                 Add("projectile", spriteLoader ("projectile.png") graphics.GraphicsDevice)
+<<<<<<< HEAD
+>>>>>>> parent of 56e918c... Added the asteroids
+=======
 >>>>>>> parent of 56e918c... Added the asteroids
         gameState <- gameState.LoadTextures(textures)
                 
