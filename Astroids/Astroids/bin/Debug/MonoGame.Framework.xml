@@ -4003,6 +4003,25 @@
             This class is used for the game window's TextInput event as EventArgs.
             </summary>
         </member>
+        <member name="M:Microsoft.Xna.Framework.Threading.IsOnUIThread">
+            <summary>
+            Checks if the code is currently running on the UI thread.
+            </summary>
+            <returns>true if the code is currently running on the UI thread.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Threading.EnsureUIThread">
+            <summary>
+            Throws an exception if the code is not currently running on the UI thread.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown if the code is not currently running on the UI thread.</exception>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Threading.BlockOnUIThread(System.Action)">
+            <summary>
+            Runs the given action on the UI thread and blocks the current thread while the action is running.
+            If the current thread is the UI thread, the action will run immediately.
+            </summary>
+            <param name="action">The action to be run on the UI thread</param>
+        </member>
         <member name="M:Microsoft.Xna.Framework.TitleContainer.OpenStream(System.String)">
             <summary>
             Returns an open stream to an exsiting file in the title storage area.
@@ -6152,6 +6171,33 @@
             Most platforms have a hard limit on how many sounds can be played simultaneously. This exception is thrown when that limit is exceeded.
             </remarks>
         </member>
+        <member name="F:Microsoft.Xna.Framework.Audio.MSADPCMToPCM.AdaptionTable">
+            A bunch of magical numbers that predict the sample data from the
+            MSADPCM wavedata. Do not attempt to understand at all costs!
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.MSADPCMToPCM.getNibbleBlock(System.Byte,System.Byte[])">
+            Splits the MSADPCM samples from each byte block.
+            @param block An MSADPCM sample byte
+            @param nibbleBlock we copy the parsed shorts into here
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.MSADPCMToPCM.calculateSample(System.Byte,System.Byte,System.Int16@,System.Int16@,System.Int16@)">
+            Calculates PCM samples based on previous samples and a nibble input.
+            @param nibble A parsed MSADPCM sample we got from getNibbleBlock
+            @param predictor The predictor we get from the MSADPCM block's preamble
+            @param sample_1 The first sample we use to predict the next sample
+            @param sample_2 The second sample we use to predict the next sample
+            @param delta Used to calculate the final sample
+            @return The calculated PCM sample
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.MSADPCMToPCM.MSADPCM_TO_PCM(System.IO.BinaryReader,System.Int16,System.Int16)">
+             Decodes MSADPCM data to signed 16-bit PCM data.
+             @param Source A BinaryReader containing the headerless MSADPCM data
+             @param numChannels The number of channels (WAVEFORMATEX nChannels)
+             @param blockAlign The ADPCM block size (WAVEFORMATEX nBlockAlign)
+             @return A byte array containing the raw 16-bit PCM wavedata
+            
+             NOTE: The original MSADPCMToPCM class returns as a short[] array!
+        </member>
         <member name="T:Microsoft.Xna.Framework.Audio.NoAudioHardwareException">
             <summary>
             The exception thrown when no audio hardware is present, or driver issues are detected.
@@ -6163,6 +6209,68 @@
         <member name="M:Microsoft.Xna.Framework.Audio.NoAudioHardwareException.#ctor(System.String,System.Exception)">
             <param name="msg">A message describing the error.</param>
             <param name="innerException">The exception that is the underlying cause of the current exception. If not null, the current exception is raised in a try/catch block that handled the innerException.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.#ctor">
+            <summary>
+            Sets up the hardware resources used by the controller.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.OpenSoundController">
+            <summary>
+            Open the sound device, sets up an audio context, and makes the new context
+            the current context. Note that this method will stop the playback of
+            music that was running prior to the game start. If any error occurs, then
+            the state of the controller is reset.
+            </summary>
+            <returns>True if the sound controller was setup, and false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.CheckALError(System.String)">
+            <summary>
+            Checks the error state of the OpenAL driver. If a value that is not AlcError.NoError
+            is returned, then the operation message and the error code is output to the console.
+            </summary>
+            <param name="operation">the operation message</param>
+            <returns>true if an error occurs, and false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.CleanUpOpenAL">
+            <summary>
+            Destroys the AL context and closes the device, when they exist.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.Dispose">
+            <summary>
+            Dispose of the OpenALSoundCOntroller.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.Dispose(System.Boolean)">
+            <summary>
+            Dispose of the OpenALSoundCOntroller.
+            </summary>
+            <param name="disposing">If true, the managed resources are to be disposed.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.ReserveSource">
+            <summary>
+            Reserves the given sound buffer. If there are no available sources then false is
+            returned, otherwise true will be returned and the sound buffer can be played. If
+            the controller was not able to setup the hardware, then false will be returned.
+            </summary>
+            <param name="soundBuffer">The sound buffer you want to play</param>
+            <returns>True if the buffer can be played, and false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.CheckInitState">
+            <summary>
+            Checks if the AL controller was initialized properly. If there was an
+            exception thrown during the OpenAL init, then that exception is thrown
+            inside of NoAudioHardwareException.
+            </summary>
+            <returns>True if the controller was initialized, false if not.</returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.OpenALSoundController.Update">
+            <summary>
+            Called repeatedly, this method cleans up the state of the management lists. This method
+            will also lock on the playingSourcesCollection. Sources that are stopped will be recycled
+            using the RecycleSource method.
+            </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Audio.SoundEffect">
             <summary>Represents a loaded sound resource.</summary>
@@ -6365,6 +6473,23 @@
             required.  If the disposing parameter is false, Dispose was called by the finalizer and
             no managed objects should be touched because we do not know if they are still valid or
             not at that time.  Unmanaged resources should always be released.</remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffectInstance.PlatformInitialize(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Creates a standalone SoundEffectInstance from given wavedata.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffectInstance.InitializeSound">
+            <summary>
+            Gets the OpenAL sound controller, constructs the sound buffer, and sets up the event delegates for
+            the reserved and recycled events.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Audio.SoundEffectInstance.XnaPitchToAlPitch(System.Single)">
+            <summary>
+            Converts the XNA [-1, 1] pitch range to OpenAL pitch (0, INF) or Android SoundPool playback rate [0.5, 2].
+            <param name="xnaPitch">The pitch of the sound in the Microsoft XNA range.</param>
+            </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Audio.SoundEffectInstance.IsLooped">
             <summary>Enables or Disables whether the SoundEffectInstance should repeat after playback.</summary>
@@ -7976,6 +8101,23 @@
             Gets the support for ATITC
             </summary>
         </member>
+        <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsCapabilities.SupportsFramebufferObjectARB">
+            <summary>
+            True, if GL_ARB_framebuffer_object is supported; false otherwise.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsCapabilities.SupportsFramebufferObjectEXT">
+            <summary>
+            True, if GL_EXT_framebuffer_object is supported; false otherwise.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsCapabilities.MaxTextureAnisotropy">
+            <summary>
+            Gets the max texture anisotropy. This value typically lies
+            between 0 and 16, where 0 means anisotropic filtering is not
+            supported.
+            </summary>
+        </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsCapabilities.SupportsSRgb">
             <summary>
             True, if sRGB is supported. On Direct3D platforms, this is always <code>true</code>.
@@ -8033,26 +8175,22 @@
             <param name="primitiveCount">The number of primitives to render from the index buffer.</param>
             <remarks>Note that minVertexIndex and numVertices are unused in MonoGame and will be ignored.</remarks>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.CreateDeviceResources">
+        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.AddDisposeAction(System.Action)">
             <summary>
-            Create graphics device specific resources.
+            Adds a dispose action to the list of pending dispose actions. These are executed at the end of each call to Present().
+            This allows GL resources to be disposed from other threads, such as the finalizer.
             </summary>
+            <param name="disposeAction">The action to execute for the dispose.</param>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Flush">
+        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.ActivateShaderProgram">
             <summary>
-            Sends queued-up commands in the command buffer to the graphics processing unit (GPU).
+            Activates the Current Vertex/Pixel shader pair into a program.         
             </summary>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Metrics">
             <summary>
             The rendering information for debugging and profiling.
             The metrics are reset every frame after draw within <see cref="M:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Present"/>. 
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Graphics.GraphicsDevice.Handle">
-            <summary>
-            Returns a handle to internal device object. Valid only on DirectX platforms.
-            For usage, convert this to SharpDX.Direct3D11.Device.
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.GraphicsDeviceStatus">
@@ -8075,6 +8213,21 @@
             The device has not been reset.
             </summary>
         </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsExtensions.GetColorFormat(Microsoft.Xna.Framework.Graphics.SurfaceFormat)">
+            <summary>
+            Convert a <see cref="T:Microsoft.Xna.Framework.Graphics.SurfaceFormat"/> to an OpenTK.Graphics.ColorFormat.
+            This is used for setting up the backbuffer format of the OpenGL context.
+            </summary>
+            <returns>An OpenTK.Graphics.ColorFormat instance.</returns>
+            <param name="format">The <see cref="T:Microsoft.Xna.Framework.Graphics.SurfaceFormat"/> to convert.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.GraphicsExtensions.GetSwapInterval(Microsoft.Xna.Framework.Graphics.PresentInterval)">
+            <summary>
+            Converts <see cref="T:Microsoft.Xna.Framework.Graphics.PresentInterval"/> to OpenGL swap interval.
+            </summary>
+            <returns>A value according to EXT_swap_control</returns>
+            <param name="interval">The <see cref="T:Microsoft.Xna.Framework.Graphics.PresentInterval"/> to convert.</param>
+        </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.GraphicsProfile">
             <summary>
             Defines a set of graphic capabilities.
@@ -8094,22 +8247,6 @@
             <summary>
             Represents a render target.
             </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.IRenderTarget.GetRenderTargetView(System.Int32)">
-            <summary>
-            Gets the <see cref="T:SharpDX.Direct3D11.RenderTargetView"/> for the specified array slice.
-            </summary>
-            <param name="arraySlice">The array slice.</param>
-            <returns>The <see cref="T:SharpDX.Direct3D11.RenderTargetView"/>.</returns>
-            <remarks>
-            For texture cubes: The array slice is the index of the cube map face.
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.IRenderTarget.GetDepthStencilView">
-            <summary>
-            Gets the <see cref="T:SharpDX.Direct3D11.DepthStencilView"/>.
-            </summary>
-            <returns>The <see cref="T:SharpDX.Direct3D11.DepthStencilView"/>. Can be <see langword="null"/>.</returns>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.IRenderTarget.Width">
             <summary>
@@ -9079,15 +9216,6 @@
             The driver updates the window client area immediately. Present operations might be affected immediately. There is no limit for framerate.
             </summary>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.Texture.GetSharedHandle">
-            <summary>
-            Gets the handle to a shared resource.
-            </summary>
-            <returns>
-            The handle of the shared resource, or <see cref="F:System.IntPtr.Zero"/> if the texture was not
-            created as a shared resource.
-            </returns>
-        </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.Texture.SortingKey">
             <summary>
             Gets a unique identifier of this texture for sorting purposes.
@@ -9262,38 +9390,6 @@
             Allows child class to specify the surface type, eg: a swap chain.
             </summary>        
         </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.Texture3D.GetData``1(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,``0[],System.Int32,System.Int32)">
-            <summary>
-            Gets a copy of 3D texture data, specifying a mipmap level, source box, start index, and number of elements.
-            </summary>
-            <typeparam name="T">The type of the elements in the array.</typeparam>
-            <param name="level">Mipmap level.</param>
-            <param name="left">Position of the left side of the box on the x-axis.</param>
-            <param name="top">Position of the top of the box on the y-axis.</param>
-            <param name="right">Position of the right side of the box on the x-axis.</param>
-            <param name="bottom">Position of the bottom of the box on the y-axis.</param>
-            <param name="front">Position of the front of the box on the z-axis.</param>
-            <param name="back">Position of the back of the box on the z-axis.</param>
-            <param name="data">Array of data.</param>
-            <param name="startIndex">Index of the first element to get.</param>
-            <param name="elementCount">Number of elements to get.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.Texture3D.GetData``1(``0[],System.Int32,System.Int32)">
-            <summary>
-            Gets a copy of 3D texture data, specifying a start index and number of elements.
-            </summary>
-            <typeparam name="T">The type of the elements in the array.</typeparam>
-            <param name="data">Array of data.</param>
-            <param name="startIndex">Index of the first element to get.</param>
-            <param name="elementCount">Number of elements to get.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.Texture3D.GetData``1(``0[])">
-            <summary>
-            Gets a copy of 3D texture data.
-            </summary>
-            <typeparam name="T">The type of the elements in the array.</typeparam>
-            <param name="data">Array of data.</param>
-        </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.RenderTargetCube">
             <summary>
             Represents a texture cube that can be used as a render target.
@@ -9334,12 +9430,6 @@
             <param name="preferredDepthFormat">The preferred format of the depth-stencil buffer.</param>
             <param name="preferredMultiSampleCount">The preferred number of multisample locations.</param>
             <param name="usage">The usage mode of the render target.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.RenderTargetCube.GetRenderTargetView(System.Int32)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.RenderTargetCube.GetDepthStencilView">
-            <inheritdoc/>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.RenderTargetCube.DepthStencilFormat">
             <summary>
@@ -9425,9 +9515,26 @@
             The SetData operation will not overwrite existing data. This allows the driver to return immediately from a SetData operation and continue rendering.
             </summary>
         </member>
+        <member name="P:Microsoft.Xna.Framework.Graphics.ConstantBuffer.HashKey">
+            <summary>
+            A hash value which can be used to compare constant buffers.
+            </summary>
+        </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.Shader.HashKey">
             <summary>
             A hash value which can be used to compare shaders.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.Graphics.ShaderProgramCache">
+            <summary>
+            This class is used to Cache the links between Vertex/Pixel Shaders and Constant Buffers.
+            It will be responsible for linking the programs under OpenGL if they have not been linked
+            before. If an existing link exists it will be resused.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.ShaderProgramCache.Clear">
+            <summary>
+            Clear the program cache releasing all shader programs.
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.SpriteBatch">
@@ -10383,19 +10490,37 @@
             ATC/ATITC compression (Android)
             </summary>
         </member>
-        <member name="T:Microsoft.Xna.Framework.Graphics.SwapChainRenderTarget">
+        <member name="M:Microsoft.Xna.Framework.Graphics.Texture3D.GetData``1(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,``0[],System.Int32,System.Int32)">
             <summary>
-            A swap chain used for rendering to a secondary GameWindow.
+            Gets a copy of 3D texture data, specifying a mipmap level, source box, start index, and number of elements.
             </summary>
-            <remarks>
-            This is an extension and not part of stock XNA.
-            It is currently implemented for Windows and DirectX only.
-            </remarks>
+            <typeparam name="T">The type of the elements in the array.</typeparam>
+            <param name="level">Mipmap level.</param>
+            <param name="left">Position of the left side of the box on the x-axis.</param>
+            <param name="top">Position of the top of the box on the y-axis.</param>
+            <param name="right">Position of the right side of the box on the x-axis.</param>
+            <param name="bottom">Position of the bottom of the box on the y-axis.</param>
+            <param name="front">Position of the front of the box on the z-axis.</param>
+            <param name="back">Position of the back of the box on the z-axis.</param>
+            <param name="data">Array of data.</param>
+            <param name="startIndex">Index of the first element to get.</param>
+            <param name="elementCount">Number of elements to get.</param>
         </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.SwapChainRenderTarget.Present">
+        <member name="M:Microsoft.Xna.Framework.Graphics.Texture3D.GetData``1(``0[],System.Int32,System.Int32)">
             <summary>
-            Displays the contents of the active back buffer to the screen.
+            Gets a copy of 3D texture data, specifying a start index and number of elements.
             </summary>
+            <typeparam name="T">The type of the elements in the array.</typeparam>
+            <param name="data">Array of data.</param>
+            <param name="startIndex">Index of the first element to get.</param>
+            <param name="elementCount">Number of elements to get.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.Texture3D.GetData``1(``0[])">
+            <summary>
+            Gets a copy of 3D texture data.
+            </summary>
+            <typeparam name="T">The type of the elements in the array.</typeparam>
+            <param name="data">Array of data.</param>
         </member>
         <member name="M:Microsoft.Xna.Framework.Graphics.TextureCollection.Dirty">
             <summary>
@@ -10428,6 +10553,11 @@
         <member name="M:Microsoft.Xna.Framework.Graphics.IndexBuffer.GraphicsDeviceResetting">
             <summary>
             The GraphicsDevice is resetting, so GPU resources must be recreated.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.IndexBuffer.GenerateIfRequired">
+            <summary>
+            If the IBO does not exist, create it.
             </summary>
         </member>
         <member name="F:Microsoft.Xna.Framework.Graphics.DynamicIndexBuffer.UserOffset">
@@ -10508,120 +10638,15 @@
             <typeparam name="T">Type of elements in the data array.</typeparam>
             <param name="data">Data array.</param>
         </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexBuffer.GenerateIfRequired">
+            <summary>
+            If the VBO does not exist, create it.
+            </summary>
+        </member>
         <member name="F:Microsoft.Xna.Framework.Graphics.DynamicVertexBuffer.UserOffset">
             <summary>
             Special offset used internally by GraphicsDevice.DrawUserXXX() methods.
             </summary>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Graphics.ImmutableVertexInputLayout">
-            <summary>
-            Immutable version of <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/>. Can be used as a key in the
-            <see cref="T:Microsoft.Xna.Framework.Graphics.InputLayoutCache"/>.
-            </summary>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout">
-            <summary>
-            Stores the vertex layout (input elements) for the input assembler stage.
-            </summary>
-            <remarks>
-            In the DirectX version the input layouts are cached in a dictionary. The
-            <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> is used as the key in the dictionary and therefore needs to
-            implement <see cref="T:System.IEquatable`1"/>. Two <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> instance are
-            considered equal if the vertex layouts are structurally identical.
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.#ctor(System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> class.
-            </summary>
-            <param name="maxVertexBufferSlots">The maximum number of vertex buffer slots.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.#ctor(Microsoft.Xna.Framework.Graphics.VertexDeclaration[],System.Int32[],System.Int32)">
-            <summary>
-            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> class.
-            </summary>
-            <param name="vertexDeclarations">The array for storing vertex declarations.</param>
-            <param name="instanceFrequencies">The array for storing instance frequencies.</param>
-            <param name="count">The number of used slots.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.Equals(System.Object)">
-            <summary>
-            Determines whether the specified <see cref="T:System.Object"/> is equal to this instance.
-            </summary>
-            <param name="obj">The object to compare with the current object.</param>
-            <returns>
-            <see langword="true"/> if the specified <see cref="T:System.Object"/> is equal to this instance;
-            otherwise, <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.Equals(Microsoft.Xna.Framework.Graphics.VertexInputLayout)">
-            <summary>
-            Determines whether the specified <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> is equal to this
-            instance.
-            </summary>
-            <param name="other">The object to compare with the current object.</param>
-            <returns>
-            <see langword="true"/> if the specified <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> is equal to this
-            instance; otherwise, <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.GetHashCode">
-            <summary>
-            Returns a hash code for this instance.
-            </summary>
-            <returns>
-            A hash code for this instance, suitable for use in hashing algorithms and data
-            structures like a hash table.
-            </returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.op_Equality(Microsoft.Xna.Framework.Graphics.VertexInputLayout,Microsoft.Xna.Framework.Graphics.VertexInputLayout)">
-            <summary>
-            Compares two <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> instances to determine whether they are the
-            same.
-            </summary>
-            <param name="left">The first instance.</param>
-            <param name="right">The second instance.</param>
-            <returns>
-            <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
-            the same; otherwise, <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.op_Inequality(Microsoft.Xna.Framework.Graphics.VertexInputLayout,Microsoft.Xna.Framework.Graphics.VertexInputLayout)">
-            <summary>
-            Compares two <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> instances to determine whether they are
-            different.
-            </summary>
-            <param name="left">The first instance.</param>
-            <param name="right">The second instance.</param>
-            <returns>
-            <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
-            the different; otherwise, <see langword="false"/>.
-            </returns>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Graphics.VertexInputLayout.Count">
-            <summary>
-            Gets or sets the number of used input slots.
-            </summary>
-            <value>The number of used input slots.</value>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.ImmutableVertexInputLayout.#ctor(Microsoft.Xna.Framework.Graphics.VertexDeclaration[],System.Int32[])">
-            <summary>
-            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.ImmutableVertexInputLayout"/> class.
-            </summary>
-            <param name="vertexDeclarations">The vertex declarations per resource slot.</param>
-            <param name="instanceFrequencies">The instance frequencies per resource slot.</param>
-            <remarks>
-            The specified arrays are stored internally - the arrays are not copied.
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.ImmutableVertexInputLayout.GetHashCode">
-            <summary>
-            Returns a hash code for this instance.
-            </summary>
-            <returns>
-            A hash code for this instance, suitable for use in hashing algorithms and data
-            structures like a hash table.
-            </returns>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.IndexElementSize">
             <summary>
@@ -10637,51 +10662,6 @@
             <summary>
             32-bit int/uint value been used.
             </summary>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Graphics.InputLayoutCache">
-            <summary>
-            Caches DirectX input layouts for the input assembler stage.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.InputLayoutCache.#ctor(Microsoft.Xna.Framework.Graphics.GraphicsDevice,System.Byte[])">
-            <summary>
-            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.InputLayoutCache"/> class.
-            </summary>
-            <param name="graphicsDevice">The graphics device.</param>
-            <param name="shaderByteCode">The byte code of the vertex shader.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.InputLayoutCache.Dispose">
-            <summary>
-            Releases all resources used by an instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.InputLayoutCache"/> class.
-            </summary>
-            <remarks>
-            This method calls the virtual <see cref="M:Microsoft.Xna.Framework.Graphics.InputLayoutCache.Dispose(System.Boolean)"/> method, passing in
-            <see langword="true"/>, and then suppresses finalization of the instance.
-            </remarks>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.InputLayoutCache.Dispose(System.Boolean)">
-            <summary>
-            Releases the unmanaged resources used by an instance of the
-            <see cref="T:Microsoft.Xna.Framework.Graphics.InputLayoutCache"/> class and optionally releases the managed resources.
-            </summary>
-            <param name="disposing">
-            <see langword="true"/> to release both managed and unmanaged resources;
-            <see langword="false"/> to release only unmanaged resources.
-            </param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.InputLayoutCache.GetOrCreate(Microsoft.Xna.Framework.Graphics.VertexBufferBindings)">
-            <summary>
-            Gets or create the DirectX input layout for the specified vertex buffers.
-            </summary>
-            <param name="vertexBuffers">The vertex buffers.</param>
-            <returns>The DirectX input layout.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.InputLayoutCache.GetInvalidArgMessage(SharpDX.Direct3D11.InputElement[])">
-            <summary>
-            Gets a more helpful message for the SharpDX invalid arg error.
-            </summary>
-            <param name="inputElements">The input elements.</param>
-            <returns>The exception message.</returns>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.PrimitiveType">
             <summary>
@@ -10776,6 +10756,91 @@
             Stores the vertex buffers to be bound to the input assembler stage.
             </summary>
         </member>
+        <member name="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout">
+            <summary>
+            Stores the vertex layout (input elements) for the input assembler stage.
+            </summary>
+            <remarks>
+            In the DirectX version the input layouts are cached in a dictionary. The
+            <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> is used as the key in the dictionary and therefore needs to
+            implement <see cref="T:System.IEquatable`1"/>. Two <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> instance are
+            considered equal if the vertex layouts are structurally identical.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> class.
+            </summary>
+            <param name="maxVertexBufferSlots">The maximum number of vertex buffer slots.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.#ctor(Microsoft.Xna.Framework.Graphics.VertexDeclaration[],System.Int32[],System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> class.
+            </summary>
+            <param name="vertexDeclarations">The array for storing vertex declarations.</param>
+            <param name="instanceFrequencies">The array for storing instance frequencies.</param>
+            <param name="count">The number of used slots.</param>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.Equals(System.Object)">
+            <summary>
+            Determines whether the specified <see cref="T:System.Object"/> is equal to this instance.
+            </summary>
+            <param name="obj">The object to compare with the current object.</param>
+            <returns>
+            <see langword="true"/> if the specified <see cref="T:System.Object"/> is equal to this instance;
+            otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.Equals(Microsoft.Xna.Framework.Graphics.VertexInputLayout)">
+            <summary>
+            Determines whether the specified <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> is equal to this
+            instance.
+            </summary>
+            <param name="other">The object to compare with the current object.</param>
+            <returns>
+            <see langword="true"/> if the specified <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> is equal to this
+            instance; otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.GetHashCode">
+            <summary>
+            Returns a hash code for this instance.
+            </summary>
+            <returns>
+            A hash code for this instance, suitable for use in hashing algorithms and data
+            structures like a hash table.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.op_Equality(Microsoft.Xna.Framework.Graphics.VertexInputLayout,Microsoft.Xna.Framework.Graphics.VertexInputLayout)">
+            <summary>
+            Compares two <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> instances to determine whether they are the
+            same.
+            </summary>
+            <param name="left">The first instance.</param>
+            <param name="right">The second instance.</param>
+            <returns>
+            <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
+            the same; otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Xna.Framework.Graphics.VertexInputLayout.op_Inequality(Microsoft.Xna.Framework.Graphics.VertexInputLayout,Microsoft.Xna.Framework.Graphics.VertexInputLayout)">
+            <summary>
+            Compares two <see cref="T:Microsoft.Xna.Framework.Graphics.VertexInputLayout"/> instances to determine whether they are
+            different.
+            </summary>
+            <param name="left">The first instance.</param>
+            <param name="right">The second instance.</param>
+            <returns>
+            <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
+            the different; otherwise, <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="P:Microsoft.Xna.Framework.Graphics.VertexInputLayout.Count">
+            <summary>
+            Gets or sets the number of used input slots.
+            </summary>
+            <value>The number of used input slots.</value>
+        </member>
         <member name="M:Microsoft.Xna.Framework.Graphics.VertexBufferBindings.#ctor(System.Int32)">
             <summary>
             Initializes a new instance of the <see cref="T:Microsoft.Xna.Framework.Graphics.VertexBufferBindings"/> class.
@@ -10826,13 +10891,6 @@
             Gets vertex buffers bound to the input slots.
             </summary>
             <returns>The vertex buffer bindings.</returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexBufferBindings.ToImmutable">
-            <summary>
-            Creates an <see cref="T:Microsoft.Xna.Framework.Graphics.ImmutableVertexInputLayout"/> that can be used as a key in the
-            <see cref="T:Microsoft.Xna.Framework.Graphics.InputLayoutCache"/>.
-            </summary>
-            <returns>The <see cref="T:Microsoft.Xna.Framework.Graphics.ImmutableVertexInputLayout"/>.</returns>
         </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.VertexDeclarationCache`1">
             <summary>
@@ -10955,6 +11013,11 @@
             </summary>
             <value>The size of a vertex (including padding) in bytes.</value>
         </member>
+        <member name="T:Microsoft.Xna.Framework.Graphics.VertexDeclaration.VertexDeclarationAttributeInfo">
+            <summary>
+            Vertex attribute information for a particular shader/vertex declaration combination.
+            </summary>
+        </member>
         <member name="T:Microsoft.Xna.Framework.Graphics.VertexElement">
             <summary>
             Defines a single element in a vertex.
@@ -11028,21 +11091,6 @@
             <see langword="true"/> if the <paramref name="left"/> and <paramref name="right"/> are
             the different; otherwise, <see langword="false"/>.
             </returns>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Graphics.VertexElement.GetInputElement(System.Int32,System.Int32)">
-            <summary>
-            Gets the DirectX <see cref="T:SharpDX.Direct3D11.InputElement"/>.
-            </summary>
-            <param name="slot">The input resource slot.</param>
-            <param name="instanceFrequency">
-            The number of instances to draw using the same per-instance data before advancing in the
-            buffer by one element. This value must be 0 for an element that contains per-vertex
-            data.
-            </param>
-            <returns><see cref="T:SharpDX.Direct3D11.InputElement"/>.</returns>
-            <exception cref="T:System.NotSupportedException">
-            Unknown vertex element format or usage!
-            </exception>
         </member>
         <member name="P:Microsoft.Xna.Framework.Graphics.VertexElement.Offset">
             <summary>
@@ -13486,22 +13534,6 @@
             </summary>
             <param name="progressCallback">Callback that reports back the progress of the music library loading in percents (0-100).</param>
         </member>
-        <member name="T:Microsoft.Xna.Framework.Media.MediaManagerState">
-            <summary>
-            This class provides a way for the MediaManager to be initialised exactly once, 
-            regardless of how many different places need it, and which is called first.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.MediaManagerState.CheckStartup">
-            <summary>
-            Ensures that the MediaManager has been initialised. Must be called from UI thread.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.MediaManagerState.CheckShutdown">
-            <summary>
-            Ensures that the MediaManager has been shutdown. Must be called from UI thread.
-            </summary>
-        </member>
         <member name="M:Microsoft.Xna.Framework.Media.MediaPlayer.Play(Microsoft.Xna.Framework.Media.Song)">
             <summary>
             Play clears the current playback queue, and then queues up the specified song for playback. 
@@ -13547,111 +13579,6 @@
         <member name="F:Microsoft.Xna.Framework.Media.VideoSoundtrackType.MusicAndDialog">
             <summary>
             This video contains music and dialog.
-            </summary>
-        </member>
-        <member name="T:Microsoft.Xna.Framework.Media.Video">
-            <summary>
-            Represents a video.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.Video.FileName">
-            <summary>
-            I actually think this is a file PATH...
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.Video.Duration">
-            <summary>
-            Gets the duration of the Video.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.Video.FramesPerSecond">
-            <summary>
-            Gets the frame rate of this video.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.Video.Height">
-            <summary>
-            Gets the height of this video, in pixels.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.Video.VideoSoundtrackType">
-            <summary>
-            Gets the VideoSoundtrackType for this video.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.Video.Width">
-            <summary>
-            Gets the width of this video, in pixels.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.VideoPlayer.GetTexture">
-            <summary>
-            Retrieves a Texture2D containing the current frame of video being played.
-            </summary>
-            <returns>The current frame of video.</returns>
-            <exception cref="T:System.InvalidOperationException">Thrown if no video is set on the player</exception>
-            <exception cref="T:System.InvalidOperationException">Thrown if the platform was unable to get a texture in a reasonable amount of time. Often the platform specific media code is running
-            in a different thread or process. Note: This may be a change from XNA behaviour</exception>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.VideoPlayer.Pause">
-            <summary>
-            Pauses the currently playing video.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.VideoPlayer.Play(Microsoft.Xna.Framework.Media.Video)">
-            <summary>
-            Plays a Video.
-            </summary>
-            <param name="video">Video to play.</param>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.VideoPlayer.Resume">
-            <summary>
-            Resumes a paused video.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.VideoPlayer.Stop">
-            <summary>
-            Stops playing a video.
-            </summary>
-        </member>
-        <member name="M:Microsoft.Xna.Framework.Media.VideoPlayer.Dispose">
-            <summary>
-            Immediately releases the unmanaged resources used by this object.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.IsDisposed">
-            <summary>
-            Gets a value that indicates whether the object is disposed.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.IsLooped">
-            <summary>
-            Gets a value that indicates whether the player is playing video in a loop.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.IsMuted">
-            <summary>
-            Gets or sets the muted setting for the video player.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.PlayPosition">
-            <summary>
-            Gets the play position within the currently playing video.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.State">
-            <summary>
-            Gets the media playback state, MediaState.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.Video">
-            <summary>
-            Gets the Video that is currently playing.
-            </summary>
-        </member>
-        <member name="P:Microsoft.Xna.Framework.Media.VideoPlayer.Volume">
-            <summary>
-            Video player volume, from 0.0f (silence) to 1.0f (full volume relative to the current device volume).
             </summary>
         </member>
         <member name="T:Microsoft.Xna.Framework.Storage.StorageContainer">
@@ -16305,6 +16232,31 @@
             </summary>
             <param name="input"></param>
             <returns></returns>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.Backend">
+            <summary>
+            The backend options for OpenTK.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Xna.Framework.Backend.Default">
+            <summary>
+            Use the default backend for the current OS. If SDL2 is found, it will be used.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Xna.Framework.Backend.Native">
+            <summary>
+            Use the native backend. SDL2 is not considered.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Xna.Framework.PlatformParameters">
+            <summary>
+            Parameters that are used in configuring the platform.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Xna.Framework.PlatformParameters.PreferredBackend">
+            <summary>
+            The preferred backend for OpenTK to use.
+            </summary>
         </member>
     </members>
 </doc>
