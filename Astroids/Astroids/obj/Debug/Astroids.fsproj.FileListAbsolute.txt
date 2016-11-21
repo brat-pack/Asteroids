@@ -20,4 +20,3 @@ c:\users\thom\documents\visual studio 2015\Projects\Astroids\Astroids\obj\Debug\
 c:\users\thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\Ship.png
 C:\Users\Thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\thruster.png
 C:\Users\Thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\projectile.png
-C:\Users\Thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\asteroid.png
