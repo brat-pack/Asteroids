@@ -7,11 +7,20 @@ open State
 open System
 open Helpers
 
+
+let spriteLoader (path) graphics =
+    use imagePath = System.IO.File.OpenRead(path)
+    let texture = Texture2D.FromStream(graphics, imagePath)
+    let textureData = Array.create<Color> (texture.Width * texture.Height) Color.Transparent
+    texture.GetData(textureData)
+    texture
+
+
 type Game1() as this =
     inherit Game()
 
     do this.Content.RootDirectory <- "Content"
-    let graphics = new GraphicsDeviceManager(this)
+    let graphics = new GraphicsDeviceManager(this);
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
     let mutable gameState = GameState.Zero()
 
@@ -30,10 +39,10 @@ type Game1() as this =
         do spriteBatch <- new SpriteBatch(this.GraphicsDevice)
         let textures = 
             Map.empty.
-                Add("Ship", spriteLoader ("Ship.png") graphics.GraphicsDevice).
-                Add("thruster", spriteLoader ("thruster.png") graphics.GraphicsDevice).
-                Add("projectile", spriteLoader ("projectile.png") graphics.GraphicsDevice).
-                Add("asteroid", spriteLoader ("asteroid.png") graphics.GraphicsDevice)
+                Add("Ship", this.Content.Load<Texture2D>("Ship")).
+                Add("thruster", this.Content.Load<Texture2D>("thruster")).
+                Add("projectile", this.Content.Load<Texture2D>("projectile")).
+                Add("asteroid",this.Content.Load<Texture2D>("asteroid"))
         gameState <- gameState.LoadTextures(textures)
                 
     override this.Update (gameTime) =
