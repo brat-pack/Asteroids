@@ -4,6 +4,8 @@ open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
 
+let r = new System.Random()
+
 let checkInput key onPressed onNotPressed = 
     let ks = Keyboard.GetState()
     match ks.[key] with
@@ -15,22 +17,29 @@ let direction rotation =
 type GameState = {
     ship     : SpaceShip
     projectiles : Projectile list
+    asteroids : Asteroid list
     textures : Map<string, Texture2D>
+    asteroidsTimer : float
 } with 
     static member Zero() = 
         {
             ship = SpaceShip.Zero()
             projectiles = []
+            asteroids = []
             textures = Map.empty
+            asteroidsTimer = 2500.0
         }
     member this.LoadTextures(textures : Map<string, Texture2D>) =
         let ship' = { this.ship with texture = textures.["Ship"]; thruster = textures.["thruster"]}
         {
             ship = ship'
             projectiles = []
+            asteroids = []
             textures = textures
+            asteroidsTimer = 2500.0
         }
     member this.Update(dt : GameTime) = 
+        let asteroidsTimer', asteroids' = this.UpdateAsteroids(dt)
         let ship', newprojectile = this.ship.Update(dt, this)
         let projectiles = 
             match newprojectile with
@@ -38,10 +47,18 @@ type GameState = {
             | None -> this.projectiles
         let projectiles' = List.map (fun (x : Projectile) -> x.Update(dt, this)) projectiles
         let projectiles'' = List.filter (fun (x : Projectile) -> x.isInsideScreen()) projectiles'
-        {this with ship = ship' ; projectiles = projectiles''}
+        {this with ship = ship' ; projectiles = projectiles''; asteroids = asteroids'; asteroidsTimer = asteroidsTimer'}
     member this.Draw(spriteBatch : SpriteBatch) = 
+        List.iter (fun (x : Asteroid) -> x.Draw(spriteBatch)) this.asteroids
         List.iter (fun (x : Projectile) -> x.Draw(spriteBatch)) this.projectiles
         this.ship.Draw(spriteBatch, this)
+
+    member this.UpdateAsteroids(dt) = 
+        let asteroids' = List.map (fun (x : Asteroid) -> x.Update(dt, this)) this.asteroids
+        if this.asteroidsTimer < 0.0 then
+            2500.0, Asteroid.Create(this.textures.["asteroid"]) :: asteroids'
+        else
+           this.asteroidsTimer - dt.ElapsedGameTime.TotalMilliseconds, asteroids'
 
 and SpaceShip = {
     velocity : Vector2
@@ -131,3 +148,33 @@ and Projectile = {
         spriteBatch.Draw(this.texture, this.position, System.Nullable(sourceRectangle), Color.White, (float32)this.rotation, origin, 1.0f, SpriteEffects.None, 1.0f)
     member this.isInsideScreen() =
         this.position.X > 0.0f && this.position.X < 1920.0f && this.position.Y > 0.0f && this.position.Y < 1080.0f 
+
+and Asteroid = {
+    texture : Texture2D
+    position : Vector2
+    velocity  : Vector2  
+    angularVelocity : float
+    rotation : float
+} with
+    static member Create(texture) =
+        let rotation = float(r.Next(-314,314)) / 100.0
+        let velocity = direction ((float32)rotation) * float32(r.Next(5, 35)) / 100.0f
+        {
+            rotation = rotation
+            velocity = velocity
+            position = new Vector2(float32(r.Next(0,1920)), float32(r.Next(0, 1080)))  
+            texture = texture
+            angularVelocity = float(r.Next(-7,7)) / 100.0 
+        }
+    
+    member this.Update(dt, gameState) = 
+        let position' = this.position + this.velocity 
+        let rotation' = this.rotation + this.angularVelocity
+        {this with position = position'; rotation = rotation'}
+    member this.Draw(spriteBatch : SpriteBatch) = 
+        let origin = new Vector2((float32)this.texture.Width / 2.0f, ((float32)this.texture.Height / 2.0f) )
+        let sourceRectangle = new Rectangle(0, 0, this.texture.Width, this.texture.Height)
+        spriteBatch.Draw(this.texture, this.position, System.Nullable(sourceRectangle), Color.White, (float32)this.rotation, origin, 1.0f, SpriteEffects.None, 1.0f)
+    member this.isInsideScreen() =
+        this.position.X > 0.0f && this.position.X < 1920.0f && this.position.Y > 0.0f && this.position.Y < 1080.0f
+            

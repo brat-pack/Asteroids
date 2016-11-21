@@ -30,26 +30,17 @@ type Game1() as this =
         do spriteBatch <- new SpriteBatch(this.GraphicsDevice)
         let textures = 
             Map.empty.
-<<<<<<< HEAD
-                Add("Ship", this.Content.Load<Texture2D>("bin/Ship")).
-                Add("thruster", this.Content.Load<Texture2D>("bin/thruster")).
-                Add("projectile", this.Content.Load<Texture2D>("bin/projectile")).
-                Add("asteroid", this.Content.Load<Texture2D>("bin/asteroid"))
-=======
                 Add("Ship", spriteLoader ("Ship.png") graphics.GraphicsDevice).
                 Add("thruster", spriteLoader ("thruster.png") graphics.GraphicsDevice).
-                Add("projectile", spriteLoader ("projectile.png") graphics.GraphicsDevice)
-<<<<<<< HEAD
->>>>>>> parent of 56e918c... Added the asteroids
-=======
->>>>>>> parent of 56e918c... Added the asteroids
+                Add("projectile", spriteLoader ("projectile.png") graphics.GraphicsDevice).
+                Add("asteroid", spriteLoader ("asteroid.png") graphics.GraphicsDevice)
         gameState <- gameState.LoadTextures(textures)
                 
     override this.Update (gameTime) =
         gameState <- gameState.Update(gameTime)
 
     override this.Draw(gameTime) =
-        do this.GraphicsDevice.Clear Color.CornflowerBlue
+        do this.GraphicsDevice.Clear Color.Black
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend)
         gameState.Draw(spriteBatch)
         spriteBatch.End()
