@@ -21,3 +21,20 @@ c:\users\thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\
 C:\Users\Thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\thruster.png
 C:\Users\Thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\projectile.png
 C:\Users\Thom\documents\visual studio 2015\Projects\Astroids\Astroids\bin\Debug\Content\asteroid.png
+C:\Asteroids\Astroids\Astroids\bin\Debug\Content\Ship.png
+C:\Asteroids\Astroids\Astroids\bin\Debug\Content\thruster.png
+C:\Asteroids\Astroids\Astroids\bin\Debug\Content\projectile.png
+C:\Asteroids\Astroids\Astroids\bin\Debug\Content\asteroid.png
+C:\Asteroids\Astroids\Astroids\bin\Debug\Astroids.exe.config
+C:\Asteroids\Astroids\Astroids\bin\Debug\Astroids.XML
+C:\Asteroids\Astroids\Astroids\bin\Debug\Astroids.exe
+C:\Asteroids\Astroids\Astroids\bin\Debug\Astroids.pdb
+C:\Asteroids\Astroids\Astroids\bin\Debug\FSharp.Core.dll
+C:\Asteroids\Astroids\Astroids\bin\Debug\MonoGame.Framework.dll
+C:\Asteroids\Astroids\Astroids\bin\Debug\NVorbis.dll
+C:\Asteroids\Astroids\Astroids\bin\Debug\OpenTK.dll
+C:\Asteroids\Astroids\Astroids\bin\Debug\MonoGame.Framework.xml
+C:\Asteroids\Astroids\Astroids\bin\Debug\FSharp.Core.xml
+C:\Asteroids\Astroids\Astroids\obj\Debug\Astroids.fsprojResolveAssemblyReference.cache
+C:\Asteroids\Astroids\Astroids\obj\Debug\Astroids.exe
+C:\Asteroids\Astroids\Astroids\obj\Debug\Astroids.pdb
