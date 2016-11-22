@@ -3,34 +3,17 @@
 open Microsoft.Xna.Framework
 open Microsoft.Xna.Framework.Graphics
 open Microsoft.Xna.Framework.Input
+open Helpers
 
 let r = new System.Random()
 
-let MakeRect (texture : Texture2D, position : Vector2) = 
-        let width = texture.Width
-        let height = texture.Height
-        let left = (int)position.X - (width / 2)
-        let top = (int)position.Y - (height / 2)
-        let rect = new Rectangle(left, top, width, height)
-        rect
-
-let CheckCollision (rect : Rectangle, rectlist : Rectangle list) = 
-    not (List.exists(fun (recti : Rectangle) -> rect.Intersects(recti)) rectlist)
-     
-let checkInput key onPressed onNotPressed = 
-    let ks = Keyboard.GetState()
-    match ks.[key] with
-            | KeyState.Down -> onPressed
-            | _ -> onNotPressed
-let direction rotation =
-    new Vector2(sin(rotation), (cos(rotation) * -1.0f))
 
 type GameState = {
     ship     : SpaceShip
     projectiles : Projectile list
     asteroids : Asteroid list
     textures : Map<string, Texture2D>
-    asteroidsTimer : float
+    asteroidSpawnTimer : float
 } with 
     static member Zero() = 
         {
@@ -38,8 +21,9 @@ type GameState = {
             projectiles = []
             asteroids = []
             textures = Map.empty
-            asteroidsTimer = 2500.0
+            asteroidSpawnTimer = 2500.0
         }
+
     member this.LoadTextures(textures : Map<string, Texture2D>) =
         let ship' = { this.ship with texture = textures.["Ship"]; thruster = textures.["thruster"]}
         {
@@ -47,31 +31,20 @@ type GameState = {
             projectiles = []
             asteroids = []
             textures = textures
-            asteroidsTimer = 2500.0
+            asteroidSpawnTimer = 2500.0
         }
-    member this.Update(dt : GameTime) = 
-        let asteroidsTimer', asteroids' = this.UpdateAsteroids(dt, this)
-        let ship', newprojectile = this.ship.Update(dt, this)
-        let projectiles = 
-            match newprojectile with
-            | Some(x) -> x :: this.projectiles
-            | None -> this.projectiles
+
+    member this.Update(dt : GameTime) =
+        let asteroidsTimer', asteroids' = Asteroid.Update(this.asteroids, dt, this)
+        let ship', projectiles = this.ship.Update(dt, this)
         let projectiles' = Projectile.Update(projectiles, dt, this)
-        {this with ship = ship' ; projectiles = projectiles'; asteroids = asteroids'; asteroidsTimer = asteroidsTimer'}
+        {this with ship = ship' ; projectiles = projectiles'; asteroids = asteroids'; asteroidSpawnTimer = asteroidsTimer'}
+
     member this.Draw(spriteBatch : SpriteBatch) = 
         List.iter (fun (x : Asteroid) -> x.Draw(spriteBatch)) this.asteroids
         List.iter (fun (x : Projectile) -> x.Draw(spriteBatch)) this.projectiles
         this.ship.Draw(spriteBatch, this)
 
-    member this.UpdateAsteroids(dt : GameTime, gameState) = 
-        let projectilePositions = List.map(fun (x : Projectile) -> MakeRect(x.texture, x.position)) gameState.projectiles
-        let asteroids' = this.asteroids |>
-            List.filter(fun (x : Asteroid) -> x.Collide(projectilePositions)) |>
-            List.map (fun (x : Asteroid) -> x.Update(dt, this)) 
-        if this.asteroidsTimer < 0.0 then
-            2500.0, Asteroid.Create(this.textures.["asteroid"]) :: asteroids'
-        else
-           this.asteroidsTimer - dt.ElapsedGameTime.TotalMilliseconds, asteroids'
 
 and SpaceShip = {
     velocity : Vector2
@@ -81,6 +54,8 @@ and SpaceShip = {
     texture  : Texture2D
     thruster : Texture2D
     cooldown : float
+    fireRate : float
+    turnSpeed: float
 } with 
     static member Zero() =
         {
@@ -91,18 +66,25 @@ and SpaceShip = {
             texture = null
             thruster = null
             cooldown = 0.0
+            fireRate = 0.25
+            turnSpeed = 0.05
         }
-    member this.Update(dt, gameState) =
-        let impulse' = direction ((float32)this.rotation) * 0.007f
-        let velocity' = checkInput Keys.W (this.velocity + impulse') this.velocity
-        let rotation' = this.rotation + checkInput Keys.A -0.03 0.0 + checkInput Keys.D 0.03 0.0
-        let position' = this.position + this.velocity * ((float32)dt.ElapsedGameTime.TotalMilliseconds) 
-        let ship' : SpaceShip = {this with position = position'}.ContainX().ContainY()
-        let projectile, cooldown' = this.Fire(gameState, dt)
-        let asteroidrect = List.map( fun (x : Asteroid) -> MakeRect(x.texture, x.position)) gameState.asteroids
-        if(this.Collide(asteroidrect)) then
-            System.Environment.Exit(0)
-        { ship' with velocity = velocity';rotation = rotation';impulse = impulse'; cooldown = cooldown'}, projectile
+
+    member this.Rect() = 
+        MakeRect(this.texture, this.position) 
+    
+    member this.Update(dt: GameTime, gameState) =
+        if (this.collidesWithAsteroid(gameState.asteroids)) then
+            { SpaceShip.Zero() with texture = gameState.textures.["Ship"]; thruster = gameState.textures.["thruster"]}, gameState.projectiles
+        else
+            let impulse' = direction ((float32)this.rotation) * 0.007f
+            let velocity' = checkInput Keys.W (this.velocity + impulse') this.velocity
+            let rotation' = this.rotation + checkInput Keys.A -this.turnSpeed 0.0 + checkInput Keys.D this.turnSpeed 0.0
+            let position' = this.position + this.velocity * ((float32)dt.ElapsedGameTime.TotalMilliseconds) |> screenLoop 
+            let ship' : SpaceShip = {this with position = position'}
+            let projectiles, cooldown' = this.Fire(gameState, dt)
+            { ship' with velocity = velocity';rotation = rotation';impulse = impulse'; cooldown = cooldown';}, projectiles
+
     member this.Draw(spriteBatch : SpriteBatch, gameState) = 
         let texture = gameState.textures.["Ship"]
         let origin = new Vector2((float32)texture.Width / 2.0f, (float32)texture.Height / 2.0f)
@@ -112,36 +94,24 @@ and SpaceShip = {
         match ks.[Keys.W] with
             | KeyState.Down -> do this.DrawThruster(spriteBatch, gameState)
             | _ -> ()
-    // Change 50.0f to the textures width/height
-    member this.ContainX() : SpaceShip =
-        if this.position.X >  1920.0f + 50.0f then
-            {this with position = new Vector2(-50.0f, this.position.Y) }
-        elif this.position.X < -50.0f then
-            {this with position = new Vector2(1920.0f + 50.0f, this.position.Y)}
-        else 
-            this
-    member this.ContainY() : SpaceShip =
-        if this.position.Y >  1080.0f + 50.0f then
-            {this with position = new Vector2(this.position.X, -50.0f) }
-        elif this.position.Y < -50.0f then
-            {this with position = new Vector2(this.position.X, 1080.0f + 50.0f)}
-        else 
-            this
+
+
     member this.DrawThruster(spriteBatch, gameState) =        
         let texture = this.thruster
         let offset = (float32)this.texture.Height / 2.0f
         let origin = new Vector2((float32)texture.Width / 2.0f, (-(float32)this.texture.Height / 2.0f) + 1.0f)
         let sourceRectangle = new Rectangle(0, 0, texture.Width, texture.Height)
         spriteBatch.Draw(texture, this.position, System.Nullable(sourceRectangle), Color.White, (float32)this.rotation, origin, 1.0f, SpriteEffects.None, 1.0f)
+
     member this.Fire(gameState, dt) =
         if checkInput Keys.Space true false && this.cooldown < 0.0 then
-            Some (Projectile.Create(gameState.textures.["projectile"], this.position, this.rotation)), 1000.0
+            Projectile.Create(gameState.textures.["projectile"], this.position, this.rotation) :: gameState.projectiles, this.fireRate * 1000.0
         else
-            None, this.cooldown - dt.ElapsedGameTime.TotalMilliseconds
-    member this.Collide(rectlist : Rectangle list) =
-        let rect = MakeRect(this.texture, this.position)
-        CheckCollision(rect, rectlist)
+            gameState.projectiles, this.cooldown - dt.ElapsedGameTime.TotalMilliseconds
 
+    member this.collidesWithAsteroid(asteroids) =
+        let asteroidRects = List.map(fun (x: Asteroid) -> x.Rect()) asteroids
+        not (CheckCollision(this.Rect(), asteroidRects))
 
 and Projectile = {
     texture : Texture2D
@@ -157,25 +127,32 @@ and Projectile = {
             velocity = velocity
             rotation = rotation
         } 
+
     static member Update(projectiles : Projectile list, dt, gamestate) = 
-        let asteroidPositions = List.map(fun (asteroids : Asteroid) -> MakeRect(asteroids.texture, asteroids.position)) gamestate.asteroids
         let projectiles' = 
             List.filter (fun (x : Projectile) -> x.isInsideScreen()) projectiles |>
-            List.filter(fun (x : Projectile) -> x.Collide(asteroidPositions)) |>
+            List.filter(fun (x : Projectile) -> x.Collide(gamestate.asteroids)) |>
             List.map (fun (x : Projectile) -> x.Update(dt, gamestate))
         projectiles'
+
+    member this.Rect() = 
+        MakeRect(this.texture, this.position) 
+
     member this.Update(dt, gameState) = 
         let position' = this.position + this.velocity * 10.0f
         {this with position = position'}
+
     member this.Draw(spriteBatch) = 
         let origin = new Vector2((float32)this.texture.Width / 2.0f, ((float32)this.texture.Height / 2.0f) )
         let sourceRectangle = new Rectangle(0, 0, this.texture.Width, this.texture.Height)
         spriteBatch.Draw(this.texture, this.position, System.Nullable(sourceRectangle), Color.White, (float32)this.rotation, origin, 1.0f, SpriteEffects.None, 1.0f)
+
     member this.isInsideScreen() =
         this.position.X > 0.0f && this.position.X < 1920.0f && this.position.Y > 0.0f && this.position.Y < 1080.0f 
-    member this.Collide(rectlist : Rectangle list) =
-        let rect = MakeRect(this.texture, this.position)
-        CheckCollision(rect, rectlist)
+
+    member this.Collide(asteroids : Asteroid list) =
+        let asteroidRects = List.map(fun (asteroid : Asteroid) -> asteroid.Rect()) asteroids
+        CheckCollision(this.Rect(), asteroidRects)
 
 
 and Asteroid = {
@@ -187,25 +164,42 @@ and Asteroid = {
 } with
     static member Create(texture) =
         let rotation = float(r.Next(-314,314)) / 100.0
-        let velocity = direction ((float32)rotation) * float32(r.Next(5, 35)) / 100.0f
+        let xSpawnPoint = if (r.Next(-1,1) = 0) then 1950.0f else -30.0f
+        let ySpawnPoint = if (r.Next(-1,1) = 0) then 1110.0f else -30.0f
+            
+        let velocity = new Vector2((float32)(r.Next(-350, 350)) / 100.0f, (float32)(r.Next(-350, 350)) / 100.0f)
         {
             rotation = rotation
             velocity = velocity
-            position = new Vector2(float32(r.Next(0,1920)), float32(r.Next(0, 1080)))  
+            position = new Vector2(xSpawnPoint, ySpawnPoint)  
             texture = texture
             angularVelocity = float(r.Next(-7,7)) / 100.0 
         }
-    member this.Collide(rectlist : Rectangle list) =
-        let rect = MakeRect(this.texture, this.position)
-        CheckCollision(rect, rectlist)
+
+    static member Update(asteroids, dt, gameState) =
+        let asteroids' = 
+            asteroids |>
+            List.filter(fun (x : Asteroid) -> x.Collide(gameState.projectiles)) |>
+            List.map (fun (x : Asteroid) -> x.Update(dt, gameState)) 
+        if gameState.asteroidSpawnTimer < 0.0 then
+            1200.0, Asteroid.Create(gameState.textures.["asteroid"]) :: asteroids'
+        else
+            gameState.asteroidSpawnTimer - dt.ElapsedGameTime.TotalMilliseconds, asteroids'
+
+    member this.Rect() =
+        MakeRect(this.texture, this.position)
+    
+    member this.Collide(projectiles : Projectile list) =
+        let projectiles' = List.map(fun (x : Projectile) -> x.Rect()) projectiles
+        CheckCollision(this.Rect(), projectiles')
+
     member this.Update(dt, gameState) = 
-        let position' = this.position + this.velocity 
+        let position' = this.position + this.velocity |> screenLoop
         let rotation' = this.rotation + this.angularVelocity
         {this with position = position'; rotation = rotation'}
+
     member this.Draw(spriteBatch : SpriteBatch) = 
         let origin = new Vector2((float32)this.texture.Width / 2.0f, ((float32)this.texture.Height / 2.0f) )
         let sourceRectangle = new Rectangle(0, 0, this.texture.Width, this.texture.Height)
         spriteBatch.Draw(this.texture, this.position, System.Nullable(sourceRectangle), Color.White, (float32)this.rotation, origin, 1.0f, SpriteEffects.None, 1.0f)
-    member this.isInsideScreen() =
-        this.position.X > 0.0f && this.position.X < 1920.0f && this.position.Y > 0.0f && this.position.Y < 1080.0f
-            
+       
