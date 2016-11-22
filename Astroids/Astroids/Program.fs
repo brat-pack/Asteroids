@@ -15,7 +15,6 @@ let spriteLoader (path) graphics =
     texture.GetData(textureData)
     texture
 
-
 type Game1() as this =
     inherit Game()
 
