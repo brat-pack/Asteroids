@@ -35,7 +35,7 @@ let screenLoop(position: Vector2) =
     new Vector2(x', y')
 
 
-let CheckCollision (rect : Rectangle, rectlist : Rectangle list) = 
+let CheckCollision(rect : Rectangle, rectlist : Rectangle list) = 
     not (List.exists(fun (recti : Rectangle) -> rect.Intersects(recti)) rectlist)
      
 let checkInput key onPressed onNotPressed = 
@@ -46,3 +46,9 @@ let checkInput key onPressed onNotPressed =
 
 let direction rotation =
     new Vector2(sin(rotation), (cos(rotation) * -1.0f))
+
+let updateTimer defaultTime currentTime (dt: GameTime) =
+    if currentTime < 0.0 then
+        defaultTime
+    else
+        currentTime - dt.ElapsedGameTime.TotalMilliseconds
