@@ -102,7 +102,7 @@ and SpaceShip = {
             let impulse' = direction ((float32)this.rotation) * 0.007f
             let velocity' = checkInput Keys.W (this.velocity + impulse') this.velocity
             let rotation' = this.rotation + checkInput Keys.A -this.turnSpeed 0.0 + checkInput Keys.D this.turnSpeed 0.0
-            let position' = move(this.position, this.velocity) * ((float32)dt.ElapsedGameTime.TotalMilliseconds) |> screenLoop 
+            let position' = move(this.position, this.velocity * ((float32)dt.ElapsedGameTime.TotalMilliseconds)) |> screenLoop 
             let ship' : SpaceShip = {this with position = position'}
             let projectile, cooldown' = this.Fire(gameState, dt)
             { ship' with velocity = velocity';rotation = rotation';impulse = impulse'; cooldown = cooldown';}, projectile

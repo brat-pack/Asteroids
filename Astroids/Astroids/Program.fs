@@ -7,7 +7,6 @@ open State
 open System
 open Helpers
 
-
 let spriteLoader (path) graphics =
     use imagePath = System.IO.File.OpenRead(path)
     let texture = Texture2D.FromStream(graphics, imagePath)
@@ -52,4 +51,3 @@ type Game1() as this =
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend)
         gameState.Draw(spriteBatch)
         spriteBatch.End()
-    

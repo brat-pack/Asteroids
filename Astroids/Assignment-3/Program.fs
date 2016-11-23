@@ -6,6 +6,7 @@ open Microsoft.Xna.Framework.Input
 open State
 open System
 open Helpers
+open Assignment
 
 
 let spriteLoader (path) graphics =
@@ -21,7 +22,7 @@ type Game1() as this =
     do this.Content.RootDirectory <- "Content"
     let graphics = new GraphicsDeviceManager(this);
     let mutable spriteBatch = Unchecked.defaultof<SpriteBatch>
-    let mutable gameState = GameState.Zero()
+    let mutable gameState = GameState.Zero(Assignment.filter_projectiles, Assignment.filter_asteroids)
 
     override this.Initialize() =
         graphics.PreferredBackBufferWidth <- 1920

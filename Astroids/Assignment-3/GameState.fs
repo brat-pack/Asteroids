@@ -13,8 +13,10 @@ type GameState = {
     textures : Map<string, Texture2D>
     asteroidTimer : float
     asteroidSpawnRate: float
+    projectileFilter : Projectile list * Asteroid list * Projectile list -> Projectile list
+    asteroidsFilter: Projectile list * Asteroid list -> Asteroid list
 } with 
-    static member Zero() = 
+    static member Zero(p_filter, a_filter) = 
         {
             ship = SpaceShip.Zero()
             projectiles = []
@@ -22,6 +24,8 @@ type GameState = {
             textures = Map.empty
             asteroidTimer = 2500.0
             asteroidSpawnRate = 1200.0
+            projectileFilter = p_filter
+            asteroidsFilter = a_filter
         }
 
     member this.LoadTextures(textures : Map<string, Texture2D>) =
@@ -33,17 +37,18 @@ type GameState = {
 
     member this.Update(dt : GameTime) =
         let ship', createdProjectile = this.ship.Update(dt, this)
+        let projectiles = this.projectileFilter(this.projectiles, this.asteroids, [])
         let projectiles' = 
-            List.filter (fun (x : Projectile) -> x.alive) this.projectiles |>
-            List.map (fun (x : Projectile) -> x.Update(dt, this)) |>
+            List.map (fun (x : Projectile) -> x.Update(dt, this)) projectiles |>
             fun projectiles -> 
                 match createdProjectile with 
                 | Some x -> x :: projectiles
                 | None -> projectiles
 
         let asteroidTimer' = this.updateAsteroidTimer this.asteroidTimer dt
+        let asteroids = this.asteroidsFilter(this.projectiles, this.asteroids)
         let asteroids' =
-            let updatedAsteroids = this.asteroids |> List.filter (fun x-> x.alive) |> List.map (fun x -> x.Update(dt, this))
+            let updatedAsteroids = asteroids |> List.map (fun x -> x.Update(dt, this))
             if this.asteroidTimer < 0.0 then
                  Asteroid.Create(this.textures.["asteroid"]) :: updatedAsteroids
             else
@@ -62,10 +67,6 @@ type GameState = {
         this.ship.Draw(spriteBatch, this)
 
     member this.updateAsteroidTimer = updateTimer this.asteroidSpawnRate
-
-    member this.updateAsteroids(dt: GameTime) =
-        fun x->
-            List.filter(fun x -> x.alive) x |> List.map(fun x-> x.Update(dt, this))
 
 and SpaceShip = {
     velocity : Vector2
@@ -133,6 +134,8 @@ and SpaceShip = {
         let asteroidRects = List.map(fun (x: Asteroid) -> x.Rect()) asteroids
         not (CheckCollision(this.Rect(), asteroidRects))
 
+
+
 and Projectile = {
     texture : Texture2D
     position : Vector2
@@ -169,6 +172,9 @@ and Projectile = {
     member this.Collide(asteroids : Asteroid list) =
         let asteroidRects = List.map(fun (asteroid : Asteroid) -> asteroid.Rect()) asteroids
         CheckCollision(this.Rect(), asteroidRects)
+
+    member this.collides_with(asteroid: Asteroid) =
+        this.Rect().Intersects(asteroid.Rect())
 
 and Asteroid = {
     texture : Texture2D
@@ -210,3 +216,5 @@ and Asteroid = {
         let origin = new Vector2((float32)this.texture.Width / 2.0f, ((float32)this.texture.Height / 2.0f) )
         let sourceRectangle = new Rectangle(0, 0, this.texture.Width, this.texture.Height)
         spriteBatch.Draw(this.texture, this.position, System.Nullable(sourceRectangle), Color.White, (float32)this.rotation, origin, 1.0f, SpriteEffects.None, 1.0f)
+
+ 
