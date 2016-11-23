@@ -12,7 +12,7 @@ open State
 
 
 // ASSIGNMENT 3A: CREATING A PREDICATE
-// This procedure is going to be a predicate that returns true when the project has hit an asteroid.
+// This procedure is going to be a predicate that returns true when the projectile has hit an asteroid.
 // projectile is the current projectile.
 // asteroids is a collection containing many asteroids.
 // The default value of count is 0
