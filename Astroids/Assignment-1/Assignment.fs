@@ -15,7 +15,7 @@ open Microsoft.Xna.Framework
 // note, the : Vector behind the parameters tell you that it is a vector2.
 
 let move(position: Vector2, velocity: Vector2) =
-    new Vector2(position.X + velocity.X, position.Y + velocity.Y)
+    new Vector2(position.X, position.Y)
 
 // Assignment 1B: TURN IT!
 // rotation is a value between -3.14159 and 3.14159 (-pi and pi)
@@ -26,4 +26,4 @@ let move(position: Vector2, velocity: Vector2) =
 // note: the f after 0.0f is an idiosyncrasy of F#. If you are unclear about whether to use 0.0f or 0.0, ask for help.
 
 let direction(rotation) =
-    new Vector2(0.0f, -0.1f)
+    new Vector2(0.0f, -1.0f)

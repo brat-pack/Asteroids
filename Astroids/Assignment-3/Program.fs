@@ -53,4 +53,3 @@ type Game1() as this =
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend)
         gameState.Draw(spriteBatch)
         spriteBatch.End()
-    
