@@ -24,8 +24,8 @@ type Game1() as this =
     let mutable gameState = GameState.Zero()
 
     override this.Initialize() =
-        graphics.PreferredBackBufferWidth <- 1920
-        graphics.PreferredBackBufferHeight <- 1080
+        graphics.PreferredBackBufferWidth <- 1366
+        graphics.PreferredBackBufferHeight <- 768
 
         graphics.IsFullScreen <- false
         graphics.ApplyChanges()

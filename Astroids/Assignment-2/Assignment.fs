@@ -13,7 +13,7 @@ open Microsoft.Xna.Framework
 // Assignment 2A: SPACESHIP LEAVING THE SCREEN
 // check if the screen contains the spaceship
 // the size of the ship is 50.0f * 50.0f
-// the size of the screen is 1920.0f * 1080.0f
+// the size of the screen is 1366.0f * 768.0f
 // if the ship is outside the screen, its position should be set to the opposite side of the screen
 // change 0.0f to the correct values
 // Note: The 0,0 position is in the top left
