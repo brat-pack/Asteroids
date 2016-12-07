@@ -82,7 +82,7 @@ and SpaceShip = {
     static member Zero() =
         {
             velocity = new Vector2()
-            position = new Vector2((float32)(r.Next(100,1820)),(float32)(r.Next(100,980)))
+            position = new Vector2((float32)(r.Next(100,1266)),(float32)(r.Next(100,570)))
             rotation = 0.0
             impulse = new Vector2()
             texture = null
@@ -126,9 +126,11 @@ and SpaceShip = {
 
     member this.Fire(gameState, dt) =
         if checkInput Keys.Space true false && this.cooldown < 0.0 then
-            Some(Projectile.Create(gameState.textures.["projectile"], this.position, this.rotation)), this.fireRate * 1000.0
+            let cooldown' = updateMissileCooldown(this.cooldown, dt.ElapsedGameTime.TotalMilliseconds, this.fireRate * 1000.0, true)
+            Some(Projectile.Create(gameState.textures.["projectile"], this.position, this.rotation)), cooldown'
         else
-            None, float(updateMissileCooldown(this.cooldown, dt.ElapsedGameTime.TotalMilliseconds))
+            let cooldown' = updateMissileCooldown(this.cooldown, dt.ElapsedGameTime.TotalMilliseconds, this.fireRate * 1000.0, false)
+            None, cooldown'
 
     member this.collidesWithAsteroid(asteroids) =
         let asteroidRects = List.map(fun (x: Asteroid) -> x.Rect()) asteroids

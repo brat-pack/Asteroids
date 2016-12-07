@@ -7,7 +7,6 @@ open State
 open System
 open Helpers
 
-
 let spriteLoader (path) graphics =
     use imagePath = System.IO.File.OpenRead(path)
     let texture = Texture2D.FromStream(graphics, imagePath)
@@ -24,8 +23,8 @@ type Game1() as this =
     let mutable gameState = GameState.Zero()
 
     override this.Initialize() =
-        graphics.PreferredBackBufferWidth <- 1920
-        graphics.PreferredBackBufferHeight <- 1080
+        graphics.PreferredBackBufferWidth <- 1366
+        graphics.PreferredBackBufferHeight <- 768
 
         graphics.IsFullScreen <- false
         graphics.ApplyChanges()
@@ -52,4 +51,3 @@ type Game1() as this =
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend)
         gameState.Draw(spriteBatch)
         spriteBatch.End()
-    

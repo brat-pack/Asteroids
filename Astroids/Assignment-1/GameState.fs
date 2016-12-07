@@ -82,7 +82,7 @@ and SpaceShip = {
     static member Zero() =
         {
             velocity = new Vector2()
-            position = new Vector2((float32)(r.Next(100,1820)),(float32)(r.Next(100,980)))
+            position = new Vector2((float32)(r.Next(100,1266)),(float32)(r.Next(100,570)))
             rotation = 0.0
             impulse = new Vector2()
             texture = null
@@ -102,7 +102,7 @@ and SpaceShip = {
             let impulse' = direction ((float32)this.rotation) * 0.007f
             let velocity' = checkInput Keys.W (this.velocity + impulse') this.velocity
             let rotation' = this.rotation + checkInput Keys.A -this.turnSpeed 0.0 + checkInput Keys.D this.turnSpeed 0.0
-            let position' = move(this.position, this.velocity) * ((float32)dt.ElapsedGameTime.TotalMilliseconds) |> screenLoop 
+            let position' = move(this.position, this.velocity * ((float32)dt.ElapsedGameTime.TotalMilliseconds)) |> screenLoop 
             let ship' : SpaceShip = {this with position = position'}
             let projectile, cooldown' = this.Fire(gameState, dt)
             { ship' with velocity = velocity';rotation = rotation';impulse = impulse'; cooldown = cooldown';}, projectile

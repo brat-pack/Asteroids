@@ -81,7 +81,7 @@ and SpaceShip = {
     static member Zero() =
         {
             velocity = new Vector2()
-            position = new Vector2((float32)(r.Next(100,1820)),(float32)(r.Next(100,980)))
+            position = new Vector2((float32)(r.Next(100,1266)),(float32)(r.Next(100,570)))
             rotation = 0.0
             impulse = new Vector2()
             texture = null

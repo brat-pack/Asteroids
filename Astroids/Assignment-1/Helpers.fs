@@ -13,23 +13,22 @@ let MakeRect (texture : Texture2D, position : Vector2) =
         rect
 
 let isInsideScreen(position: Vector2) = 
-    position.X > 0.0f && position.X < 1920.0f && position.Y > 0.0f && position.Y < 1080.0f
-
+    position.X > 0.0f && position.X < 1366.0f && position.Y > 0.0f && position.Y < 768.0f
 
 let screenLoop(position: Vector2) =
     let x' : float32 =
-        if position.X > 1920.0f + 50.0f then
+        if position.X > 1366.0f + 50.0f then
             -50.0f
         elif position.X < -50.0f then
-            1920.0f + 50.0f
+            1366.0f + 50.0f
         else 
             position.X
 
     let y' : float32 =
-        if position.Y >  1920.0f + 50.0f then
+        if position.Y >  768.0f + 50.0f then
             -50.0f
         elif position.Y < -50.0f then
-            1080.0f + 50.0f
+            768.0f + 50.0f
         else 
             position.Y
     new Vector2(x', y')
